@@ -6,3 +6,4 @@ coverage/
 .DS_Store
 *node_modulesnode_modules/
 *.node
+node_modules/
