@@ -34,13 +34,13 @@ jobs:
           echo "Changed files:"
           echo "$changed_files"
           
-          if echo "$changed_files" | grep -q '^frontend/'; then
+          if echo "$changed_files" | grep -q '^front-end/'; then
             echo "frontend=true" >> $GITHUB_OUTPUT
           else
             echo "frontend=false" >> $GITHUB_OUTPUT
           fi
           
-          if echo "$changed_files" | grep -q '^backend/'; then
+          if echo "$changed_files" | grep -q '^back-end/'; then
             echo "backend=true" >> $GITHUB_OUTPUT
           else
             echo "backend=false" >> $GITHUB_OUTPUT
@@ -55,18 +55,27 @@ jobs:
         include:
           - component: frontend
             directory: front-end
+            dockerfile: front-end/Dockerfile
           - component: backend
             directory: back-end
+            dockerfile: back-end/Dockerfile
     steps:
       - uses: actions/checkout@v4
 
       - name: Verify directory exists
         id: check-dir
         run: |
+          echo "Checking for ${{ matrix.directory }} directory..."
           if [ -d "${{ matrix.directory }}" ]; then
+            echo "Directory exists"
             echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Contents of ${{ matrix.directory }}:"
+            ls -la "${{ matrix.directory }}"
           else
+            echo "Directory does not exist"
             echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Root directory contents:"
+            ls -la
           fi
 
       - name: Set up Docker Buildx
@@ -83,24 +92,23 @@ jobs:
       - name: Build and push Docker image
         if: needs.detect-changes.outputs.build-${{ matrix.component }} == 'true' && steps.check-dir.outputs.exists == 'true'
         run: |
+          echo "Building ${{ matrix.component }} from ${{ matrix.directory }}"
+          cd ${{ matrix.directory }}
+          
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            TAG=pr-${{ github.event.number }}
+            TAG="pr-${{ github.event.number }}"
           else
-            TAG=${{ github.sha }}
+            TAG="${{ github.sha }}"
           fi
           
-          echo "========================================"
-          echo "Debugging information:"
-          echo "Current directory before cd: $(pwd)"
-          echo "Listing current directory contents:"
-          ls -la
-          echo "Looking for ${{ matrix.directory }} directory..."
-          ls -la ${{ matrix.directory }} || echo "Directory not found"
-          echo "========================================"
+          echo "Building with tag: $TAG"
           docker build -t ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG .
+          
+          echo "Pushing image..."
           docker push ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG
           
           if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Tagging and pushing latest..."
             docker tag ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:latest
             docker push ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:latest
           fi
