@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_BUILDKIT: 1
-  DOCKER_HUB_REPO: realamponsah/azubi_project_2 
+  DOCKER_HUB_REPO: realamponsah/azubi_project_2
 
 jobs:
   detect-changes:
@@ -27,6 +27,7 @@ jobs:
           echo "Checking changed files..."
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+            git diff
           else
             changed_files=$(git diff --name-only HEAD~1 HEAD)
           fi
@@ -90,7 +91,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: needs.detect-changes.outputs.build-${{ matrix.component }} == 'true' && steps.check-dir.outputs.exists == 'true'
+        if: needs.detect-changes.outputs.build-frontend == 'true' || needs.detect-changes.outputs.build-backend == 'true'
         run: |
           echo "Building ${{ matrix.component }} from ${{ matrix.directory }}"
           cd ${{ matrix.directory }}
