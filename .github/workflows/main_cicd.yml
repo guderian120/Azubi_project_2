@@ -1,15 +1,21 @@
-name: Build Docker Images
+name: Docker Build CI
 
 on:
   push:
-    branches: [ main ]  # Change to your default branch if different
+    branches: [ main ]
     paths:
       - 'frontend/**'
       - 'backend/**'
-      - '.github/workflows/docker-build.yml'  # Trigger if workflow file changes
+      - '.github/workflows/docker-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/docker-build.yml'
 
 env:
-  DOCKER_BUILDKIT: 1  # Enable Docker BuildKit for faster builds
+  DOCKER_BUILDKIT: 1
 
 jobs:
   detect-changes:
@@ -22,13 +28,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare changes
+          fetch-depth: 2
 
       - name: Check for frontend changes
         id: check-frontend
         run: |
           echo "Checking for frontend changes..."
-          changes=$(git diff --name-only HEAD~1 HEAD | grep -c '^frontend/') || true
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -c '^frontend/') || true
+          else
+            changes=$(git diff --name-only HEAD~1 HEAD | grep -c '^frontend/') || true
+          fi
+          echo "changed=$changes" >> $GITHUB_STATE
           if [ "$changes" -gt 0 ]; then
             echo "frontend-changed=true" >> $GITHUB_OUTPUT
           else
@@ -39,7 +50,12 @@ jobs:
         id: check-backend
         run: |
           echo "Checking for backend changes..."
-          changes=$(git diff --name-only HEAD~1 HEAD | grep -c '^backend/') || true
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            changes=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep -c '^backend/') || true
+          else
+            changes=$(git diff --name-only HEAD~1 HEAD | grep -c '^backend/') || true
+          fi
+          echo "changed=$changes" >> $GITHUB_STATE
           if [ "$changes" -gt 0 ]; then
             echo "backend-changed=true" >> $GITHUB_OUTPUT
           else
@@ -59,8 +75,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         
-      - name: Login to Docker Hub (optional)
-        if: env.DOCKER_HUB_USERNAME && env.DOCKER_HUB_TOKEN
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME && secrets.DOCKER_HUB_TOKEN
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -69,17 +85,21 @@ jobs:
       - name: Build Frontend Docker image
         working-directory: ./frontend
         run: |
-          docker build \
-            --tag frontend:${GITHUB_SHA::7} \
-            --tag frontend:latest \
-            .
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            docker build --tag frontend:pr-${{ github.event.number }} .
+          else
+            docker build \
+              --tag frontend:${{ github.sha }} \
+              --tag frontend:latest \
+              .
+          fi
             
-      - name: Push Frontend Docker image (optional)
-        if: env.DOCKER_HUB_USERNAME && env.DOCKER_HUB_TOKEN
+      - name: Push Frontend Docker image
+        if: github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME && secrets.DOCKER_HUB_TOKEN
         run: |
-          docker tag frontend:${GITHUB_SHA::7} ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:${GITHUB_SHA::7}
+          docker tag frontend:${{ github.sha }} ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:${{ github.sha }}
           docker tag frontend:latest ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:latest
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:${GITHUB_SHA::7}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:${{ github.sha }}
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/frontend:latest
 
   build-backend:
@@ -95,8 +115,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         
-      - name: Login to Docker Hub (optional)
-        if: env.DOCKER_HUB_USERNAME && env.DOCKER_HUB_TOKEN
+      - name: Login to Docker Hub
+        if: github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME && secrets.DOCKER_HUB_TOKEN
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -105,15 +125,19 @@ jobs:
       - name: Build Backend Docker image
         working-directory: ./backend
         run: |
-          docker build \
-            --tag backend:${GITHUB_SHA::7} \
-            --tag backend:latest \
-            .
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            docker build --tag backend:pr-${{ github.event.number }} .
+          else
+            docker build \
+              --tag backend:${{ github.sha }} \
+              --tag backend:latest \
+              .
+          fi
             
-      - name: Push Backend Docker image (optional)
-        if: env.DOCKER_HUB_USERNAME && env.DOCKER_HUB_TOKEN
+      - name: Push Backend Docker image
+        if: github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME && secrets.DOCKER_HUB_TOKEN
         run: |
-          docker tag backend:${GITHUB_SHA::7} ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${GITHUB_SHA::7}
+          docker tag backend:${{ github.sha }} ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
           docker tag backend:latest ${{ secrets.DOCKER_HUB_USERNAME }}/backend:latest
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${GITHUB_SHA::7}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }}
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:latest
