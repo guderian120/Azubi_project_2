@@ -89,8 +89,11 @@ jobs:
             TAG=${{ github.sha }}
           fi
           
-          echo "pring current working directory: ${{ matrix.directory }}  $(pwd)"
+          echo "pring current working directory: ${{ matrix.directory }} "
           cd ${{ matrix.directory }}
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
           docker build -t ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG .
           docker push ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG
           
