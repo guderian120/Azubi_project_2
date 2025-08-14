@@ -89,11 +89,14 @@ jobs:
             TAG=${{ github.sha }}
           fi
           
-          echo "pring current working directory: ${{ matrix.directory }} "
-          cd ${{ matrix.directory }}
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
+          echo "========================================"
+          echo "Debugging information:"
+          echo "Current directory before cd: $(pwd)"
+          echo "Listing current directory contents:"
           ls -la
+          echo "Looking for ${{ matrix.directory }} directory..."
+          ls -la ${{ matrix.directory }} || echo "Directory not found"
+          echo "========================================"
           docker build -t ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG .
           docker push ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG
           
