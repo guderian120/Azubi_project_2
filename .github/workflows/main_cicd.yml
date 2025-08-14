@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_BUILDKIT: 1
-  DOCKER_HUB_REPO: your-dockerhub-username/repo-name  # Update this
+  DOCKER_HUB_REPO: realamponsah/azubi_project_2
 
 jobs:
   detect-changes:
