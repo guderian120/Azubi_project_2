@@ -16,7 +16,7 @@
         "spatie/laravel-medialibrary": "^11.9",
         "spatie/laravel-permission": "^6.9",
         "ext-curl": "*"
-    },
+    }, 
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "knuckleswtf/scribe": "^4.38",
