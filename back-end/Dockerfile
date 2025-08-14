@@ -24,7 +24,7 @@ RUN composer config -g repo.packagist composer https://mirrors.aliyun.com/compos
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-autoloader
 
-COPY .env .env
+COPY .env.example .env
 # Copy all files
 COPY . .
 
