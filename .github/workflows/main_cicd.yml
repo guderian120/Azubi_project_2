@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_BUILDKIT: 1
-  DOCKER_HUB_REPO: your-dockerhub-username/repo-name  # Update this
+  DOCKER_HUB_REPO: realamponsah/azubi_project_2 
 
 jobs:
   detect-changes:
@@ -89,6 +89,7 @@ jobs:
             TAG=${{ github.sha }}
           fi
           
+          echo "pring current working directory: ${{ matrix.directory }}  $(pwd)"
           cd ${{ matrix.directory }}
           docker build -t ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG .
           docker push ${{ env.DOCKER_HUB_REPO }}-${{ matrix.component }}:$TAG
