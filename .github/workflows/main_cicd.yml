@@ -14,8 +14,8 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      build-front-end: ${{ steps.check-dirs.outputs.front-end }}
-      build-back-end: ${{ steps.check-dirs.outputs.back-end }}
+      build-frontend: ${{ steps.check-dirs.outputs.frontend }}
+      build-backend: ${{ steps.check-dirs.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,16 +34,16 @@ jobs:
           echo "Changed files:"
           echo "$changed_files"
           
-          if echo "$changed_files" | grep -q '^front-end/'; then
-            echo "front-end=true" >> $GITHUB_OUTPUT
+          if echo "$changed_files" | grep -q '^frontend/'; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
           else
-            echo "front-end=false" >> $GITHUB_OUTPUT
+            echo "frontend=false" >> $GITHUB_OUTPUT
           fi
           
-          if echo "$changed_files" | grep -q '^back-end/'; then
-            echo "back-end=true" >> $GITHUB_OUTPUT
+          if echo "$changed_files" | grep -q '^backend/'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
           else
-            echo "back-end=false" >> $GITHUB_OUTPUT
+            echo "backend=false" >> $GITHUB_OUTPUT
           fi
 
   build-and-push:
@@ -51,11 +51,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [front-end, back-end]
+        component: [frontend, backend]
         include:
-          - component: front-end
+          - component: frontend
             directory: front-end
-          - component: back-end
+          - component: backend
             directory: back-end
     steps:
       - uses: actions/checkout@v4
