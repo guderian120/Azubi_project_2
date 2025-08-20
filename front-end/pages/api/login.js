@@ -4,7 +4,9 @@ import axios from 'axios';
 
 export default withSession(async (req, res) => {
     const {username, password} = await req.body
-    const loginUrl = process.env.BACKEND_API_HOST+'/api/login';
+    // Use Docker service name for server-side API calls
+    const backendHost = process.env.NEXT_PRIVATE_BACKEND_HOST || process.env.BACKEND_API_HOST;
+    const loginUrl = backendHost + '/api/login';
 
 
     try {

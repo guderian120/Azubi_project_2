@@ -105,7 +105,9 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: needs.detect-changes.outputs.build-frontend == 'true' || needs.detect-changes.outputs.build-backend == 'true'
+        if: |
+          (matrix.component == 'frontend' && needs.detect-changes.outputs.build-frontend == 'true') ||
+          (matrix.component == 'backend' && needs.detect-changes.outputs.build-backend == 'true')
         run: |
           echo "Building ${{ matrix.component }} from ${{ matrix.directory }}"
           cd ${{ matrix.directory }}

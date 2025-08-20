@@ -13,12 +13,15 @@ export default async function auth({req, res}) {
     }
 
 
+    // Use client-accessible URL for frontend API calls (browser requests)
+    const clientBackendUrl = process.env.BACKEND_API_HOST;
+    
     let configBundle = {
         user: req.session.get('user'),
         apiToken: req.session.get('api_token'),
-        backendUrl: process.env.BACKEND_API_HOST + "/api",
-        hostUrl: process.env.BACKEND_API_HOST,
-        authHeader: {"Authorization": "Bearer " + req.session.get('api_token')}
+        backendUrl: clientBackendUrl + "/api",
+        hostUrl: clientBackendUrl,
+        authHeader: req.session.get('api_token') ? {"Authorization": "Bearer " + req.session.get('api_token')} : {}
     }
 
     return {

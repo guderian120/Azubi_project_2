@@ -59,7 +59,9 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:5000
-      - BACKEND_API_HOST=http://clms-backend:5000
+      - BACKEND_API_HOST=http://localhost:5000
+      # Docker service name for server-side API calls
+      - NEXT_PRIVATE_BACKEND_HOST=http://clms-backend:5000
     depends_on:
       - backend
     networks:
