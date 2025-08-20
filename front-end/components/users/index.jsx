@@ -1,5 +1,5 @@
 import {useContext, useEffect, useState} from "react";
-import axios from "axios";
+import {api} from "@/lib/axios";
 import {errorAlert, successAlert, sweetConfirm} from "@/lib/alerts";
 import {AppContext} from "@/components/context";
 import Loader from "@/components/loader";
@@ -19,10 +19,9 @@ export default function UsersIndex({users}) {
 
     }, []);
 
-
     const deleteDatum = async (datum) => {
         try {
-            const response = await axios.delete(`${config.backendUrl}/admin/users/${datum.id}`, {
+            const response = await api.delete(`/api/admin/users/${datum.id}`, {
                 headers: {...config.authHeader}
             });
 
@@ -33,25 +32,16 @@ export default function UsersIndex({users}) {
             }
 
         } catch (err) {
+            console.error("Delete error:", err);
             errorAlert("Oops!", "Something went wrong!");
         }
-    }
-    const initDeletion = async () => {
-        const confirmed = await sweetConfirm("Delete this item?", "You won't be able to undo this!");
-
-        if (confirmed) {
-            await deleteDatum(activeRecord);
-        } else {
-            console.log("Action canceled");
-        }
-
     }
 
     const fetchData = async () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.get(`${config.backendUrl}/admin/users`, {
+            const response = await api.get(`/api/admin/users`, {
                 headers: {...config.authHeader}
             });
 
@@ -69,6 +59,18 @@ export default function UsersIndex({users}) {
 
         setIsLoading(false);
     }
+
+    const initDeletion = async () => {
+        const confirmed = await sweetConfirm("Delete this item?", "You won't be able to undo this!");
+
+        if (confirmed) {
+            await deleteDatum(activeRecord);
+        } else {
+            console.log("Action canceled");
+        }
+
+    }
+
 
     if (isLoading) {
         return <Loader loading={isLoading}/>;

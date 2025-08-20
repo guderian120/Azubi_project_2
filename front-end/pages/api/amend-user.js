@@ -2,7 +2,7 @@ import withSession from "@/lib/session";
 
 export default withSession(async (req, res) => {
     const user = req.session.get('user');
-
+    console.log("updating user", user);
     const current_token = req.session.get('api_token');
 
     const {updated_user, api_token} = await req.body

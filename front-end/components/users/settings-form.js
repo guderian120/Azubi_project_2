@@ -1,6 +1,6 @@
 import {useContext, useEffect, useState} from "react";
 import FormError from "@/components/form-error";
-import axios from "axios";
+import {api} from "@/lib/axios";
 import {AppContext} from "@/components/context";
 import Swal from "sweetalert2";
 
@@ -51,7 +51,7 @@ export default function SettingsForm(props) {
 
     const updateInSession = async (updatedUser) => {
         try {
-            const response = await axios.post("/api/amend-user", {
+            const response = await api.post("/api/amend-user", {
                 updated_user: updatedUser,
                 api_token: config.apiToken
             });
@@ -66,7 +66,7 @@ export default function SettingsForm(props) {
 
 
     const processUpdate = async (formData) => {
-        const response = await axios.patch(`${config.backendUrl}/users/${props.initData.id}`, formData, {
+        const response = await api.patch(`/api/users/${props.initData.id}`, formData, {
             headers: {...config.authHeader,}
         });
 

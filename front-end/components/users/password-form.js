@@ -1,6 +1,6 @@
 import FormError from "@/components/form-error";
 import {useContext, useState} from "react";
-import axios from "axios";
+import {api} from "@/lib/axios";
 import {AppContext} from "@/components/context";
 import Swal from "sweetalert2";
 
@@ -22,7 +22,7 @@ export default function PasswordForm({user}) {
                 password: password,
                 password_confirmation: confirmPassword,
             }
-            const response = await axios.patch(`${config.backendUrl}/users/${user.id}/change-password`, formData, {
+            const response = await api.patch(`/api/users/${user.id}/change-password`, formData, {
                 headers: {...config.authHeader,}
             });
 
