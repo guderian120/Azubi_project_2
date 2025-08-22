@@ -7,3 +7,5 @@ coverage/
 *node_modulesnode_modules/
 *.node
 node_modules/
+jenkins_infra/*
+jenkins_infra/
