@@ -15,3 +15,7 @@ gitbak/
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+
+/mtest.sh
+metabase/*
+metabase
