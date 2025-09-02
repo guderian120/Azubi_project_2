@@ -19,3 +19,5 @@ gitbak/
 /mtest.sh
 metabase/*
 metabase
+.next/*
+.next/
