@@ -20,25 +20,6 @@ Note: Infrastructure and unrelated bash scripts have been intentionally disregar
 - broken/ — Original broken code for reference/comparison
 
 
-## High-level Architecture
-
-```mermaid
-flowchart LR
-  Browser((Browser))
-  FE[Next.js Frontend\n(front-end, :3000)]
-  BE[Laravel API\n(back-end, :5000)]
-  DB[(MySQL 8\nclms_db)]
-
-  Browser <--> FE
-  FE <--> BE
-  BE <--> DB
-
-  subgraph Local Network / Docker Bridge
-    FE
-    BE
-    DB
-  end
-```
 
 Key ports
 - Frontend: 3000
